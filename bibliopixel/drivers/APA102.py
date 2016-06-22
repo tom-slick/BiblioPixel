@@ -1,4 +1,4 @@
-from spi_driver_base import DriverSPIBase, ChannelOrder
+from . spi_driver_base import DriverSPIBase, ChannelOrder
 
 
 class DriverAPA102(DriverSPIBase):
@@ -11,13 +11,10 @@ class DriverAPA102(DriverSPIBase):
         # APA102 requires latch bytes at the end
         self._latchBytes = (int(num / 64.0) + 1)
 
-    def _fixData(self, data):
-        gamma = self.gamma
-        self._buf[:] = [0] * self.bufByteCount
-        for a, b in enumerate(self.c_order):
-            self._buf[a:self.numLEDs * 3:3] = [gamma[v] for v in data[b::3]]
+    def _write_colors_to_buffer(self, colors, pos):
+        super(DriverAPA102, self)._write_colors_to_buffer(colors, pos)
 
-        newBuf = [0xFF] * (self.bufByteCount + self.numLEDs)
+        newBuf = [0xFF] * (self.bufByteCount() + self.numLEDs)
         newBuf[1::4] = self._buf[0::3]
         newBuf[2::4] = self._buf[1::3]
         newBuf[3::4] = self._buf[2::3]
