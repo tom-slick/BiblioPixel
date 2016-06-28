@@ -4,7 +4,7 @@ import math, threading, time
 from . import colors, font
 
 try:
-    from tdsp import ColorList
+    from timedata import ColorList
 except:
     ColorList = list
 

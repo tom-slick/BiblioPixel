@@ -6,8 +6,10 @@ from . APA102 import DriverAPA102
 from . LPD8806 import DriverLPD8806
 from . WS2801 import DriverWS2801
 
+
 def mock_open(self, fname, perm='r'):
-    pass #
+    pass
+
 
 class DriverTest(unittest.TestCase):
     COLORS = [(0, 0, 0),
@@ -20,7 +22,7 @@ class DriverTest(unittest.TestCase):
     def test_trivial(self):
         driver = DriverBase(num=4)
         for i in range(len(driver._buf)):
-           driver._buf[i] = 23  # randomize
+            driver._buf[i] = 23  # randomize
         self.assertTrue(all(driver._buf))
         driver._write_colors_to_buffer([(0, 0, 0)] * 4, 0)
         self.assertFalse(any(driver._buf))  # It wrote zeroes!

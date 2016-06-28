@@ -179,7 +179,7 @@ class DriverSerial(DriverBase):
                         except:
                             pass
                         log.info("Using COM Port: %s, Device ID: %s, Device Ver: %s",
-                            self.dev, self.deviceID, self.devVer)
+                                 self.dev, self.deviceID, self.devVer)
 
                     if self.dev == "" or self.dev is None:
                         error = "Unable to find device with ID: {}".format(
@@ -200,7 +200,7 @@ class DriverSerial(DriverBase):
                             devID = id
 
                     log.info("Using COM Port: %s, Device ID: %s, Device Ver: %s",
-                        self.dev, devID, self.devVer)
+                             self.dev, devID, self.devVer)
 
             try:
                 self._com = serial.Serial(self.dev, timeout=5)
@@ -312,11 +312,12 @@ class DriverSerial(DriverBase):
             return True
 
     # Push new data to strand
-    def _receive_colors(self, colors, pos):
+    def _receive_colors(self, colors):
         count = self.bufByteCount() + self._bufPad
         packet = DriverSerial._generateHeader(CMDTYPE.PIXEL_DATA, count)
 
-        self._write_colors_to_buffer(colors, pos)
+        colors = self._color_correct(colors)
+        self._buf = self._flatten(colors)
 
         packet.extend(self._buf)
         packet.extend([0] * self._bufPad)

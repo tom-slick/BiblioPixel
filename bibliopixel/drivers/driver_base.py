@@ -1,4 +1,5 @@
 import time
+import sys
 
 
 class ChannelOrder:
@@ -35,6 +36,11 @@ class DriverBase(object):
         self._thread = None
         self.lastUpdate = 0
 
+        if 'timedata' in sys.modules:
+            self._flatten = self._flatten_timedata
+        else:
+            self._flatten = self._flatten_basic
+
     def __enter__(self):
         return self
 
@@ -48,22 +54,30 @@ class DriverBase(object):
         return 3 * self.numLEDs
 
     # Push new data to strand
-    def _receive_colors(self, colors, pos):
+    def _receive_colors(self, colors):
         # TODO: use abc here.
         raise RuntimeError("Base class receive_colors() called.")
 
     def receive_colors(self, colors, pos):
         start = time.time() * 1000.0
-        self._receive_colors(colors, pos)
+        self._receive_colors(colors[pos:self.numLEDs+pos])
         if self._thread:
             self.lastUpdate = (time.time() * 1000.0) - start
 
     def setMasterBrightness(self, brightness):
         return False
 
-    def _write_colors_to_buffer(self, colors, pos):
+    # call _flatten() instead!
+    def _flatten_basic(self, colors):
+        return [i for c in colors for i in c]
+
+    # call _flatten() instead!
+    def _flatten_timedata(self, colors):
+        return [int(i) for i in self._flatten_basic(colors)]
+
+    def _color_correct(self, colors):
         gamma, (r, g, b) = self.gamma, self.c_order
         for i in range(self.numLEDs):
-            fix = lambda x: gamma[max(0, min(255, int(x)))]
-            c = tuple(int(x) for x in colors[i + pos])
-            self._buf[i * 3:(i + 1) * 3] = fix(c[r]), fix(c[g]), fix(c[b])
+            fix = lambda x: gamma[int(max(0, min(255, int(x))))]  # flake8: noqa
+            colors[i] = (fix(colors[i][r]), fix(colors[i][g]), fix(colors[i][b]))
+        return colors
