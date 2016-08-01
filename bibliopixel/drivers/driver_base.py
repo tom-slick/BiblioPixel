@@ -36,11 +36,6 @@ class DriverBase(object):
         self._thread = None
         self.lastUpdate = 0
 
-        if 'timedata' in sys.modules:
-            self._flatten = self._flatten_timedata
-        else:
-            self._flatten = self._flatten_basic
-
     def __enter__(self):
         return self
 
@@ -67,13 +62,8 @@ class DriverBase(object):
     def setMasterBrightness(self, brightness):
         return False
 
-    # call _flatten() instead!
-    def _flatten_basic(self, colors):
+    def _flatten(self, colors):
         return [i for c in colors for i in c]
-
-    # call _flatten() instead!
-    def _flatten_timedata(self, colors):
-        return [int(i) for i in self._flatten_basic(colors)]
 
     def _color_correct(self, colors):
         gamma, (r, g, b) = self.gamma, self.c_order
