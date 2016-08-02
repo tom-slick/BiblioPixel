@@ -283,8 +283,7 @@ class DriverSerial(DriverBase):
         count = self.bufByteCount() + self._bufPad
         packet = util.generate_header(CMDTYPE.PIXEL_DATA, count)
 
-        colors = self._color_correct(colors)
-        self._buf = self._flatten(colors)
+        self._buf = self._render(colors)
 
         packet.extend(self._buf)
         packet.extend([0] * self._bufPad)

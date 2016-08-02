@@ -31,6 +31,9 @@ class DriverNetwork(DriverBase):
             log.error(error)
             raise IOError(error)
 
+    def _gamma_correct_and_permute(self, colors):
+        return colors
+
     # Push new data to strand
     def _receive_colors(self, colors):
         try:
@@ -39,7 +42,7 @@ class DriverNetwork(DriverBase):
             count = self.bufByteCount()
             packet = util.generate_header(CMDTYPE.PIXEL_DATA, count)
 
-            colors = self._flatten(colors)
+            colors = self._render(colors)
             packet.extend(colors)
             s.sendall(packet)
 

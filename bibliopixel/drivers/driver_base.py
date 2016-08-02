@@ -16,7 +16,8 @@ class ChannelOrder:
 class DriverBase(object):
     """Base driver class to build other drivers from"""
 
-    def __init__(self, num=0, width=0, height=0, c_order=ChannelOrder.RGB, gamma=None):
+    def __init__(self, num=0, width=0, height=0, c_order=ChannelOrder.RGB,
+                 gamma=None, gamma_value=1.0):
         if num == 0:
             num = width * height
             if num == 0:
@@ -25,6 +26,7 @@ class DriverBase(object):
 
         self.numLEDs = num
         self.gamma = gamma or range(256)
+        self.gamma_value = gamma_value
 
         self.c_order = c_order
         self.perm = ChannelOrder.ORDERS.index(c_order)
@@ -62,10 +64,11 @@ class DriverBase(object):
     def setMasterBrightness(self, brightness):
         return False
 
-    def _flatten(self, colors):
-        return [i for c in colors for i in c]
+    def _render(self, colors):
+        colors = self._gamma_correct_and_permute(colors)
+        return bytearray(i for c in colors for i in c)
 
-    def _color_correct(self, colors):
+    def _gamma_correct_and_permute(self, colors):
         gamma, (r, g, b) = self.gamma, self.c_order
         for i in range(self.numLEDs):
             fix = lambda x: gamma[int(max(0, min(255, int(x))))]  # flake8: noqa
