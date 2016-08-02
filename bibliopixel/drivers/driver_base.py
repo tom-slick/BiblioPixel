@@ -51,26 +51,27 @@ class DriverBase(object):
         return 3 * self.numLEDs
 
     # Push new data to strand
-    def _receive_colors(self, colors):
+    def _receive_colors(self, colors, pos):
         # TODO: use abc here.
         raise RuntimeError("Base class receive_colors() called.")
 
     def receive_colors(self, colors, pos):
         start = time.time() * 1000.0
-        self._receive_colors(colors[pos:self.numLEDs+pos])
+        self._receive_colors(colors, pos)
         if self._thread:
             self.lastUpdate = (time.time() * 1000.0) - start
 
     def setMasterBrightness(self, brightness):
         return False
 
-    def _render(self, colors):
-        colors = self._gamma_correct_and_permute(colors)
+    def _render(self, colors, pos):
+        colors = self._gamma_correct_and_permute(colors, pos)
         return bytearray(i for c in colors for i in c)
 
-    def _gamma_correct_and_permute(self, colors):
+    def _gamma_correct_and_permute(self, colors, pos):
         gamma, (r, g, b) = self.gamma, self.c_order
         for i in range(self.numLEDs):
             fix = lambda x: gamma[int(max(0, min(255, int(x))))]  # flake8: noqa
-            colors[i] = (fix(colors[i][r]), fix(colors[i][g]), fix(colors[i][b]))
+            ci = colors[i + pos]
+            colors[i + pos] = (fix(ci[r]), fix(ci[g]), fix(ci[b]))
         return colors

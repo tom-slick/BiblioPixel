@@ -279,11 +279,11 @@ class DriverSerial(DriverBase):
             return True
 
     # Push new data to strand
-    def _receive_colors(self, colors):
+    def _receive_colors(self, colors, pos):
         count = self.bufByteCount() + self._bufPad
         packet = util.generate_header(CMDTYPE.PIXEL_DATA, count)
 
-        self._buf = self._render(colors)
+        self._buf = self._render(colors, pos)
 
         packet.extend(self._buf)
         packet.extend([0] * self._bufPad)

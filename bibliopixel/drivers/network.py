@@ -31,18 +31,18 @@ class DriverNetwork(DriverBase):
             log.error(error)
             raise IOError(error)
 
-    def _gamma_correct_and_permute(self, colors):
+    def _gamma_correct_and_permute(self, colors, pos):
         return colors
 
     # Push new data to strand
-    def _receive_colors(self, colors):
+    def _receive_colors(self, colors, pos):
         try:
             s = self._connect()
 
             count = self.bufByteCount()
             packet = util.generate_header(CMDTYPE.PIXEL_DATA, count)
 
-            colors = self._render(colors)
+            colors = self._render(colors, pos)
             packet.extend(colors)
             s.sendall(packet)
 
