@@ -65,13 +65,9 @@ class DriverBase(object):
         return False
 
     def _render(self, colors, pos):
-        colors = self._gamma_correct_and_permute(colors, pos)
-        return bytearray(i for c in colors for i in c)
-
-    def _gamma_correct_and_permute(self, colors, pos):
         gamma, (r, g, b) = self.gamma, self.c_order
         for i in range(self.numLEDs):
             fix = lambda x: gamma[int(max(0, min(255, int(x))))]  # flake8: noqa
             ci = colors[i + pos]
             colors[i + pos] = (fix(ci[r]), fix(ci[g]), fix(ci[b]))
-        return colors
+        return bytearray(i for c in colors for i in c)

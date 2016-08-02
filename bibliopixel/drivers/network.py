@@ -31,8 +31,8 @@ class DriverNetwork(DriverBase):
             log.error(error)
             raise IOError(error)
 
-    def _gamma_correct_and_permute(self, colors, pos):
-        return colors
+    def _render(self, colors, pos):
+        return bytearray(i for c in colors for i in c)
 
     # Push new data to strand
     def _receive_colors(self, colors, pos):
