@@ -1,6 +1,6 @@
 import time
 import sys
-from .. import log
+from .. import log, timedata
 
 
 class ChannelOrder:
@@ -16,8 +16,6 @@ class ChannelOrder:
 
 class DriverBase(object):
     """Base driver class to build other drivers from"""
-
-    USE_TIMEDATA = False and '--disable_timedata' not in sys.argv
 
     def __init__(self, num=0, width=0, height=0, c_order=ChannelOrder.RGB,
                  gamma=None, gamma_value=1.0, min_value=0, max_value=255):
@@ -43,17 +41,11 @@ class DriverBase(object):
 
         self._frame = None
 
-        if self.USE_TIMEDATA:
-            try:
-                import timedata
-                log.info('Loading timedata renderer')
-                self._renderer = timedata.Renderer(
-                    gamma=gamma_value,
-                    permutation=self.perm,
-                    min=min_value,
-                    max=max_value).render
-            except:
-                pass
+        self._td_renderer = timedata.TIMEDATA and timedata.TIMEDATA.Renderer(
+            gamma=gamma_value,
+            permutation=self.perm,
+            min=min_value,
+            max=max_value).render
 
     def cleanup(self):
         return self.__exit__(None, None, None)
@@ -87,6 +79,7 @@ class DriverBase(object):
         return bytearray(i for c in colors for i in c)
 
     def _render(self, colors, offset):
-        self._frame = self._renderer(
+        render = (timedata.ENABLED and self._td_renderer) or self._renderer
+        self._frame = render(
             colors, offset=offset, length=self.numLEDs, output=self._frame)
         return self._frame

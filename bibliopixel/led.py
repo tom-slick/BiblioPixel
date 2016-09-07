@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 
 import math, sys, threading, time
-from . import colors, font, log
-from . use_timedata import timedata, ColorList
+from . import colors, font, log, timedata
 
 class updateThread(threading.Thread):
 
@@ -51,9 +50,10 @@ class LEDBase(object):
         if not hasattr(self, 'numLEDs'):
             self.numLEDs = sum(d.numLEDs for d in self.driver)
 
-        # This buffer will always be the same list - i.e. is guaranteed to only
+        # self._colors will always be the same list - i.e. is guaranteed to only
         # be changed by list surgery, never assignment.
-        self._colors = ColorList()
+        td = timedata.timedata()
+        self._colors = td.ColorList() if td else []
         self.all_off()
         assert len(self._colors) == self.numLEDs
 
@@ -90,8 +90,11 @@ class LEDBase(object):
         pass
 
     def _get_base(self, pixel, result=None):
-        if result and timedata:
-            return self._colors.get(pixel, result)
+        if result:
+            try:
+                return self._colors.get(pixel, result)
+            except AttributeError:
+                pass
         if pixel >= 0 and pixel < self.numLEDs:
             return self._colors[pixel]
         return 0, 0, 0  # don't go out of bounds
