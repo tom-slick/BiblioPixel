@@ -1,4 +1,5 @@
-from distutils.core import setup
+from __future__ import print_function
+from setuptools import setup
 import bibliopixel
 
 setup(
